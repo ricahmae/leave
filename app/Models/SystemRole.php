@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\UserSystemRole;
+
+class SystemRole extends Model
+{
+    use HasFactory;
+
+    protected $table = 'system_roles';
+
+    protected $fillable = [
+        "name",
+        "description",
+        "updated_at",
+        "system_id"
+    ];
+
+    public $timestamps = TRUE;
+
+    public function system()
+    {
+        return $this->belongsTo(System::class);
+    }
+
+    public function permissions()
+    {
+        return $this->hasMany(SystemRolePermission::class);
+    }
+
+    public function hasPermission($routePermission)
+    {
+        $permissions = $this->permissions;
+
+        return $permissions->contains(function ($permission) {
+            return $permission->validate($routePermission);
+        });
+    }
+}
+    
