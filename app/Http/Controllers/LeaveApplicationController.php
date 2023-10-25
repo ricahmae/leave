@@ -12,6 +12,7 @@ use App\Models\LeaveApplicationLog;
 use App\Models\LeaveApplicationRequirement;
 use Illuminate\Http\Request;
 use App\Services\FileService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 class LeaveApplicationController extends Controller
 {
@@ -123,7 +124,8 @@ class LeaveApplicationController extends Controller
                                                                     ->first();
                             if($leave_applications){
                             
-                                $leave_application_log = new LeaveApplicationLog();
+                                 
+                                 $leave_application_log = new LeaveApplicationLog();
                                 $leave_application_log->action = $action;
                                 $leave_application_log->leave_application_id = $leave_application_id;
                                 $leave_application_log->action_by = $user_id;
@@ -133,6 +135,21 @@ class LeaveApplicationController extends Controller
                                 $leave_application = LeaveApplication::findOrFail($leave_application_id);   
                                 $leave_application->status = $new_status;
                                 $leave_application->update();
+
+                                if($new_status=="approved")
+                                {
+                                    $leave_application_date_time=LeaveApplicationDateTime::findOrFail($leave_application_id);
+                                    $total_days = 0;
+    
+                                    foreach ($leave_application_date_time as $leave_date_time) {
+                                        $date_from = Carbon::parse($leave_date_time->date_from);
+                                        $date_to = Carbon::parse($leave_date_time->date_to);
+                                        
+                                        $total_days += $date_to->diffInDays($date_from) + 1; // Add 1 to include both the start and end dates
+                                        
+                                    }
+                                }
+                                
                                     
                                 return response(['message' => 'Application has been sucessfully '.$message_action, 'data' => $leave_application], Response::HTTP_CREATED); 
                                 }
