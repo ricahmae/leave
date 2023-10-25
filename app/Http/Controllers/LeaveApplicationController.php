@@ -146,13 +146,22 @@ class LeaveApplicationController extends Controller
                                         $date_to = Carbon::parse($leave_date_time->date_to);
                                         
                                         $total_days += $date_to->diffInDays($date_from) + 1; // Add 1 to include both the start and end dates
-                                        
+
                                     }
+
+                                    $employee_leave_credits = new EmployeeLeaveCredit();
+                                    $employee_leave_credits->employee_profile_id = $user->id;
+                                    $employee_leave_credits->leave_application_id = $leave_application_id;
+                                    $employee_leave_credits->operation = "deduct";
+                                    $employee_leave_credits->leave_credit = $total_days;
+                                    $employee_leave_credits->date = now()->toDateString('Ymd');
+                                    $employee_leave_credits->save();
+    
                                 }
                                 
                                     
                                 return response(['message' => 'Application has been sucessfully '.$message_action, 'data' => $leave_application], Response::HTTP_CREATED); 
-                                }
+                            }
                 }           
             }
 
