@@ -39,7 +39,6 @@ class ObApplicationController extends Controller
         }
     }
 
-   
     public function getObApplications(Request $request)
     {
         $status = $request->status;  
@@ -75,9 +74,7 @@ class ObApplicationController extends Controller
 
         return ResourcesObApplication::collection($ob_applications->paginate(50));
     }
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
         //
@@ -137,9 +134,60 @@ class ObApplicationController extends Controller
         }
       
     }
-    /**
-     * Store a newly created resource in storage.
-     */
+
+    public function updateObApplication(Request $request)
+    {
+        try{
+            $ob_application_id= $request->ot_application_id;
+            $official_business_application = ObApplication::findOrFail($ob_application_id); 
+            $official_business_application->date_from = $request->date_from;
+            $official_business_application->date_to = $request->date_to;
+            $official_business_application->business_from = $request->business_from;
+            $official_business_application->business_to = $request->business_to;
+            $official_business_application->date = now()->toDateString('Ymd');
+            $official_business_application->update();
+         
+            if ($request->hasFile('requirements')) {
+                $requirements = $request->file('requirements');
+
+                if($requirements){
+
+                    $official_business_application_id = $official_business_application->id; 
+                    foreach ($requirements as $requirement) {
+                        $official_business_requirement = $this->storeOfficialbusinessApplicationRequirement($official_business_application_id);
+                        $official_business_requirement_id = $official_business_requirement->id;
+
+                        if($official_business_requirement){
+                            $filename = config('enums.storage.leave') . '/' 
+                                        . $official_business_requirement_id ;
+
+                            $uploaded_image = $this->file_service->uploadRequirement($official_business_requirement_id->id, $requirement, $filename, "REQ");
+
+                            if ($uploaded_image) {                     
+                                $official_business_requirement_id = ObApplicationRequirement::where('id','=',$official_business_requirement->id)->first();  
+                                if($official_business_requirement  ){
+                                    $official_business_requirement_name = $requirement->getleaveOriginalName();
+                                    $official_business_requirement =  ObApplicationRequirement::findOrFail($official_business_requirement->id);
+                                    $official_business_requirement->name = $official_business_requirement_name;
+                                    $official_business_requirement->filename = $uploaded_image;
+                                    $official_business_requirement->update();
+                                }                                      
+                            }                           
+                        }
+                    }
+                        
+                }     
+            }
+            $process_name="Update";
+            $official_business_logs = $this->storeOfficialBusinessApplicationLog($official_business_application_id,$process_name);
+            return response()->json(['data' => 'Success'], Response::HTTP_OK);
+        }catch(\Throwable $th){
+         
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+      
+    }
+
     public function store(Request $request)
     {
         try{
@@ -228,7 +276,6 @@ class ObApplicationController extends Controller
             return response()->json(['message' => $e->getMessage(),  'error'=>true]);
         }
     }
-
     
     public function storeOfficialBusinessApplicationRequirement($official_business_application_id)
     {
@@ -242,6 +289,7 @@ class ObApplicationController extends Controller
             return response()->json(['message' => $e->getMessage(),'error'=>true]);
         }
     }
+
     public function storeOfficialBusinessApplicationLog($official_time_application_id,$process_name)
     {
         try {
@@ -295,33 +343,21 @@ class ObApplicationController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(ObApplication $obApplication)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(ObApplication $obApplication)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, ObApplication $obApplication)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(ObApplication $obApplication)
     {
         //

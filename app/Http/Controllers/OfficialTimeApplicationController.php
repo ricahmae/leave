@@ -254,6 +254,59 @@ class OfficialTimeApplicationController extends Controller
       
     }
 
+    public function updateOtApplication(Request $request)
+    {
+        try{
+            $ot_application_id= $request->ot_application_id;
+            $official_time_application = OfficialTimeApplication::findOrFail($ot_application_id); 
+            $official_time_application->date_from = $request->date_from;
+            $official_time_application->date_to = $request->date_to;
+            $official_time_application->time_from = $request->time_from;
+            $official_time_application->time_to = $request->time_to;
+            $official_time_application->date = now()->toDateString('Ymd');
+            $official_time_application->update();
+         
+            if ($request->hasFile('requirements')) {
+                $requirements = $request->file('requirements');
+
+                if($requirements){
+
+                    $official_time_application_id = $official_time_application->id; 
+                    foreach ($requirements as $requirement) {
+                        $official_time_requirement = $this->storeOfficialTimeApplicationRequirement($official_time_application_id);
+                        $official_time_requirement_id = $official_time_requirement->id;
+
+                        if($official_time_requirement){
+                            $filename = config('enums.storage.leave') . '/' 
+                                        . $official_time_requirement_id ;
+
+                            $uploaded_image = $this->file_service->uploadRequirement($official_time_requirement_id->id, $requirement, $filename, "REQ");
+
+                            if ($uploaded_image) {                     
+                                $official_time_requirement_id = OtApplicationRequirement::where('id','=',$official_time_requirement->id)->first();  
+                                if($official_time_requirement  ){
+                                    $official_time_requirement_name = $requirement->getleaveOriginalName();
+                                    $official_time_requirement =  OtApplicationRequirement::findOrFail($official_time_requirement->id);
+                                    $official_time_requirement->name = $official_time_requirement_name;
+                                    $official_time_requirement->filename = $uploaded_image;
+                                    $official_time_requirement->update();
+                                }                                      
+                            }                           
+                        }
+                    }
+                        
+                }     
+            }
+            $process_name="Update";
+            $official_time_logs = $this->storeOfficialTimeApplicationLog($official_time_application_id,$process_name);
+            return response()->json(['data' => 'Success'], Response::HTTP_OK);
+        }catch(\Throwable $th){
+         
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+      
+    }
+
     public function storeOfficialTimeApplicationRequirement($official_time_application_id)
     {
         try {
