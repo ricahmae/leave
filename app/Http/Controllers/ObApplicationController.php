@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ObApplication;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ObApplication as ResourcesObApplication;
+use App\Http\Resources\ObApplicationLog as ResourcesObApplicationLog;
 use App\Models\EmployeeProfile;
 use App\Models\ObApplicationLog;
 use App\Models\ObApplicationRequirement;
@@ -256,6 +257,41 @@ class ObApplicationController extends Controller
             return $official_time_application_log;
         } catch(\Exception $e) {
             return response()->json(['message' => $e->getMessage(),'error'=>true]);
+        }
+    }
+
+    public function cancelObApplication(Request $request)
+    {
+        try {
+                    $ob_application_id = $request->ob_application_id;
+                    $ob_applications = ObApplication::where('id','=', $ob_application_id)
+                                                            ->first();
+                if($ob_applications)
+                {
+                        $user_id = Auth::user()->id;     
+                        $user = EmployeeProfile::where('id','=',$user_id)->first();
+                        $user_password=$user->password;
+                        $password=$request->password;
+                        if($user_password==$password)
+                        {
+                            if($user_id){
+                                $ob_application_log = new ObApplicationLog();
+                                $ob_application_log->action = 'cancelled';
+                                $ob_application_log->ob_application_id = $ob_application_id;
+                                $ob_application_log->date = now()->toDateString('Ymd');
+                                $ob_application_log->action_by = $user_id;
+                                $ob_application_log->save();
+
+                                $ob_application = ObApplication::findOrFail($ob_application_id);
+                                $ob_application->status = 'cancelled';
+                                $ob_application->update();
+                                return response(['message' => 'Application has been sucessfully cancelled', 'data' => $ob_application], Response::HTTP_CREATED);  
+            
+                            }
+                         }
+                }
+            } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage(),  'error'=>true]);
         }
     }
 

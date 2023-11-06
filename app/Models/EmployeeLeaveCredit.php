@@ -29,4 +29,6 @@ class EmployeeLeaveCredit extends Model
     {
         return $this->belongsTo(LeaveType::class);
     }
+
+    
 }

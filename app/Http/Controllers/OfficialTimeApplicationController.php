@@ -164,6 +164,41 @@ class OfficialTimeApplicationController extends Controller
         }
     }
 
+    public function cancelOtApplication(Request $request)
+    {
+        try {
+                    $ot_application_id = $request->ot_application_id;
+                    $ot_applications = OfficialTimeApplication::where('id','=', $ot_application_id)
+                                                            ->first();
+                if($ot_applications)
+                {
+                        $user_id = Auth::user()->id;     
+                        $user = EmployeeProfile::where('id','=',$user_id)->first();
+                        $user_password=$user->password;
+                        $password=$request->password;
+                        if($user_password==$password)
+                        {
+                            if($user_id){
+                                $ot_application_log = new ModelsOtApplicationLog();
+                                $ot_application_log->action = 'cancelled';
+                                $ot_application_log->ot_application_id = $ot_application_id;
+                                $ot_application_log->date = now()->toDateString('Ymd');
+                                $ot_application_log->action_by = $user_id;
+                                $ot_application_log->save();
+
+                                $ot_application = OfficialTimeApplication::findOrFail($ot_application_id);
+                                $ot_application->status = 'cancelled';
+                                $ot_application->update();
+                                return response(['message' => 'Application has been sucessfully cancelled', 'data' => $ot_application], Response::HTTP_CREATED);  
+            
+                            }
+                         }
+                }
+            } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage(),  'error'=>true]);
+        }
+    }
+
     public function updateStatus (Request $request)
     {
         try {
@@ -218,43 +253,6 @@ class OfficialTimeApplicationController extends Controller
         }
       
     }
-
-    public function declineObApplication(Request $request)
-    {
-        try {
-                    $ot_application_id = $request->ot_application_id;
-                    $ot_applications = OvertimeApplication::where('id','=', $ot_application_id)
-                                                            ->first();
-                if($ot_applications)
-                {
-                        $user_id = Auth::user()->id;     
-                        $user = EmployeeProfile::where('id','=',$user_id)->first();
-                        $user_password=$user->password;
-                        $password=$request->password;
-                        if($user_password==$password)
-                        {
-                            if($user_id){
-                                $ot_application_log = new ModelsOtApplicationLog();
-                                $ot_application_log->action = 'declined';
-                                $ot_application_log->ot_application_id = $ot_application_id;
-                                $ot_application_log->date = now()->toDateString('Ymd');
-                                $ot_application_log->action_by = $user_id;
-                                $ot_application_log->save();
-
-                                $ot_application = OfficialTimeApplication::findOrFail($ot_application_id);
-                                $ot_application->declined_at = now();
-                                $ot_application->status = 'declined';
-                                $ot_application->update();
-                                return response(['message' => 'Application has been sucessfully declined', 'data' => $ot_application], Response::HTTP_CREATED);  
-            
-                            }
-                         }
-                }
-            } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage(),  'error'=>true]);
-        }
-    }
-
 
     public function storeOfficialTimeApplicationRequirement($official_time_application_id)
     {

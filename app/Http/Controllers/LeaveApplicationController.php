@@ -30,6 +30,7 @@ class LeaveApplicationController extends Controller
     public function checkUserLeaveCredit(Request $request)
     {
         $leave_application_id = $request->leave_application_id;
+        $leave_type_id = $request->leave_type_id;
         $leave_application_date_time=LeaveApplicationDateTime::findOrFail($leave_application_id);
         $total_days = 0;
 
@@ -44,11 +45,13 @@ class LeaveApplicationController extends Controller
 
         // Compute total leave credits to add
         $total_leave_credit_to_add = EmployeeLeaveCredit::where('employee_profile_id', $user->id)
+            ->where('leave_type_id', $leave_type_id)
             ->where('operation', 'add')
             ->sum('$user->id');
     
         // Compute total leave credits to deduct
         $total_leave_credit_to_deduct = EmployeeLeaveCredit::where('employee_profile_id', $user->id)
+            ->where('leave_type_id', $leave_type_id)
             ->where('operation', 'deduct')
             ->sum('credit_value');
 
@@ -105,10 +108,66 @@ class LeaveApplicationController extends Controller
 
     return response()->json(['employee_leave_credit_balance' => $results]);
     }
+    public function getEmployeeLeaveCreditLogs(Request $request)
+    {
+      
+        $results =EmployeeProfile::with(['personalInformation:id,first_name,last_name,middle_name', 'leaveCredits.leaveType:id,name'])
+        ->select('date_hired','personal_information_id','id')
+        ->get();
+       
+
+    return response()->json(['data' => $results]);
+    }
 
    
+    public function getUserLeaveCreditsLogs()
+    {
+        try{ 
+            $user_id = Auth::user()->id;
+            $user = EmployeeProfile::where('id','=',$user_id)->first();
+            $leave_credits=[];
+            
+           $leave_credits =EmployeeLeaveCredit::with('leaveType:id,name')->where('employee_profile_id','=',$user->id)->get();
+          
+           
+          
+             return response()->json(['data' => $leave_credits], Response::HTTP_OK);
+        }catch(\Throwable $th){
+        
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+    }
 
     public function getUserLeaveApplication()
+    {
+        try{ 
+            // $user_id = Auth::user()->id;
+            // $user = EmployeeProfile::where('id','=',$user_id)->first();
+            $leave_applications=[];
+            
+           $leave_applications =LeaveApplication::where('id','=','1')->get();
+           $leave_application_resource=ResourcesLeaveApplication::collection($leave_applications);
+           
+            // Compute total leave credits to add
+            $total_leave_credit_to_add = EmployeeLeaveCredit::where('employee_profile_id', '1')
+            ->where('operation', 'add')
+            ->sum('credit_value');
+
+            // Compute total leave credits to deduct
+            $total_leave_credit_to_deduct = EmployeeLeaveCredit::where('employee_profile_id', '1')
+                ->where('operation', 'deduct')
+                ->sum('credit_value');
+
+            // Calculate the difference
+            $total_leave_credit = $total_leave_credit_to_add - $total_leave_credit_to_deduct;
+             return response()->json(['data' => $leave_application_resource,'total_leave_credit'=> $total_leave_credit], Response::HTTP_OK);
+        }catch(\Throwable $th){
+        
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+    }
+
+    public function getUserLeaveApplicationLogs()
     {
         try{ 
             $user_id = Auth::user()->id;
@@ -195,7 +254,7 @@ class LeaveApplicationController extends Controller
                                 $message_action="Approved";
                             }
                             else if($status == 'for-approval-head'){
-                                $action = 'Aprroved by Department Head';
+                                $action = 'Aprroved by Division Head';
                                 $new_status='approved';
                                 $message_action="Approved";
                             }

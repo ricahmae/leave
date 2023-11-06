@@ -21,9 +21,13 @@ Route::namespace('App\Http\Controllers')->group(function () {
     Route::post('reset-password', 'UserController@resetPassword');
     Route::get('leave_types', 'LeaveTypeController@index');
     Route::get('leave_applications', 'LeaveApplicationController@index');
+    Route::get('user_leave_applications', 'LeaveApplicationController@getUserLeaveApplication');
     Route::get('official_time_applications', 'OfficialTimeApplicationController@index');
     Route::get('official_business_applications', 'ObApplicationController@index');
     Route::get('employee_leave_credit', 'LeaveApplicationController@getEmployeeLeaveCredit');
+    Route::get('employee_leave_credit_logs', 'LeaveApplicationController@getEmployeeLeaveCreditLogs');
+    Route::get('user_leave_credit_logs', 'LeaveApplicationController@getUserLeaveCreditsLogs');
+    
     Route::post('leave_type', 'LeaveTypeController@store');
 });
 
