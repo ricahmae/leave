@@ -23,7 +23,7 @@ Route::namespace('App\Http\Controllers')->group(function () {
     Route::get('leave_applications', 'LeaveApplicationController@index');
     Route::get('official_time_applications', 'OfficialTimeApplicationController@index');
     Route::get('official_business_applications', 'ObApplicationController@index');
-    
+    Route::get('employee_leave_credit', 'LeaveApplicationController@getEmployeeLeaveCredit');
     Route::post('leave_type', 'LeaveTypeController@store');
 });
 

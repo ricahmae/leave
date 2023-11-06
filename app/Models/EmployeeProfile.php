@@ -12,6 +12,7 @@ class EmployeeProfile extends Model
     protected $table = 'employee_profiles';
 
     public $fillable = [
+        'id',
         'employee_id',
         'profile_url',
         'date_hired',
@@ -35,4 +36,12 @@ class EmployeeProfile extends Model
     {
         return $this->hasMany(EmployeeStation::class);
     }
+
+    public function leaveCredits()
+    {
+        return $this->hasMany(EmployeeLeaveCredit::class);
+    }
+    
+
+    
 }

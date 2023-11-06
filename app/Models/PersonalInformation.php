@@ -80,4 +80,6 @@ class PersonalInformation extends Model
     {
         return $this->hasMany(PasswordTrail::class);
     }
+
+    
 }

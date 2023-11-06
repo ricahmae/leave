@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Response;
 use App\Models\LeaveApplication;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EmployeeLeaveCredit as ResourcesEmployeeLeaveCredit;
 use App\Http\Resources\LeaveApplication as ResourcesLeaveApplication;
 use App\Models\EmployeeLeaveCredit;
 use App\Models\EmployeeProfile;
@@ -26,11 +27,38 @@ class LeaveApplicationController extends Controller
         $this->file_service = $file_service; 
     }
 
-    public function checkLeaveCredit()
+    public function checkUserLeaveCredit(Request $request)
     {
-        
-        
+        $leave_application_id = $request->leave_application_id;
+        $leave_application_date_time=LeaveApplicationDateTime::findOrFail($leave_application_id);
+        $total_days = 0;
 
+        foreach ($leave_application_date_time as $leave_date_time) {
+            $date_from = Carbon::parse($leave_date_time->date_from);
+            $date_to = Carbon::parse($leave_date_time->date_to);
+            $total_days += $date_to->diffInDays($date_from) + 1; 
+        }
+        $user_id = Auth::user()->id;
+        $user = EmployeeProfile::where('id','=',$user_id)->first();
+    
+
+        // Compute total leave credits to add
+        $total_leave_credit_to_add = EmployeeLeaveCredit::where('employee_profile_id', $user->id)
+            ->where('operation', 'add')
+            ->sum('$user->id');
+    
+        // Compute total leave credits to deduct
+        $total_leave_credit_to_deduct = EmployeeLeaveCredit::where('employee_profile_id', $user->id)
+            ->where('operation', 'deduct')
+            ->sum('credit_value');
+
+        // Calculate the difference
+        $total_leave_credit = $total_leave_credit_to_add - $total_leave_credit_to_deduct;
+    
+        if($total_days >  $total_leave_credit){  
+            return response()->json(['message' => 'Insufficient Leave Credit Value'], Response::HTTP_OK);
+        }
+    
     }
         public function index()
     {
@@ -47,6 +75,39 @@ class LeaveApplicationController extends Controller
         }
     }
    
+    public function getEmployeeLeaveCredit(Request $request)
+    {
+      
+        $results = EmployeeProfile::with(['personalInformation','leaveCredits.leaveType'])
+        ->get()
+        ->map(function ($employee) {
+            $leaveCredits = $employee->leaveCredits->groupBy('leaveType.name');
+
+            $result = [];
+
+            foreach ($leaveCredits as $leave_type => $credits) {
+                $total_balance = $credits->sum(function ($credit) {
+                    return ($credit->operation === 'add') ? $credit->credit_value : -$credit->credit_value;
+                });
+
+                $result[] = [
+                    'leave_type' => $leave_type,
+                    'total_balance' => $total_balance,
+                ];
+            }
+
+            return [
+                'employee_id' => $employee->id,
+                'employee_name' =>   $employee->personalInformation->first_name,
+                'leave_credit_balance' => $result,
+            ];
+        });
+
+    return response()->json(['employee_leave_credit_balance' => $results]);
+    }
+
+   
+
     public function getUserLeaveApplication()
     {
         try{ 
@@ -57,7 +118,19 @@ class LeaveApplicationController extends Controller
            $leave_applications =LeaveApplication::where('user_id','=',$user->id)->get();
            $leave_application_resource=ResourcesLeaveApplication::collection($leave_applications);
            
-             return response()->json(['data' => $leave_application_resource], Response::HTTP_OK);
+            // Compute total leave credits to add
+            $total_leave_credit_to_add = EmployeeLeaveCredit::where('employee_profile_id', $user->id)
+            ->where('operation', 'add')
+            ->sum('$user->id');
+
+            // Compute total leave credits to deduct
+            $total_leave_credit_to_deduct = EmployeeLeaveCredit::where('employee_profile_id', $user->id)
+                ->where('operation', 'deduct')
+                ->sum('credit_value');
+
+            // Calculate the difference
+            $total_leave_credit = $total_leave_credit_to_add - $total_leave_credit_to_deduct;
+             return response()->json(['data' => $leave_application_resource,'total_leave_credit'=> $total_leave_credit], Response::HTTP_OK);
         }catch(\Throwable $th){
         
             return response()->json(['message' => $th->getMessage()], 500);

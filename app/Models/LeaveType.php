@@ -23,5 +23,8 @@ class LeaveType extends Model
         public function requirements(){ 
             return $this->belongsToMany(Requirement::class, 'leave_type_requirements', 'leave_type_id', 'requirement_id');
         }
-       
+        public function employeeLeaveCredits()
+        {
+            return $this->hasMany(EmployeeLeaveCredit::class);
+        }
 }
