@@ -38,7 +38,7 @@ class ObApplicationController extends Controller
         }
     }
 
-
+   
     public function getObApplications(Request $request)
     {
         $status = $request->status;  

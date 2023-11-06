@@ -26,7 +26,13 @@ class LeaveApplicationController extends Controller
         $this->file_service = $file_service; 
     }
 
-    public function index()
+    public function checkLeaveCredit()
+    {
+        
+        
+
+    }
+        public function index()
     {
         try{ 
             $leave_applications=[];
@@ -41,7 +47,23 @@ class LeaveApplicationController extends Controller
         }
     }
    
-
+    public function getUserLeaveApplication()
+    {
+        try{ 
+            $user_id = Auth::user()->id;
+            $user = EmployeeProfile::where('id','=',$user_id)->first();
+            $leave_applications=[];
+            
+           $leave_applications =LeaveApplication::where('user_id','=',$user->id)->get();
+           $leave_application_resource=ResourcesLeaveApplication::collection($leave_applications);
+           
+             return response()->json(['data' => $leave_application_resource], Response::HTTP_OK);
+        }catch(\Throwable $th){
+        
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+    }
+   
     public function getLeaveApplications(Request $request)
     {
         $status = $request->status;  
@@ -52,21 +74,15 @@ class LeaveApplicationController extends Controller
         }
         else if($status == 'for-approval-supervisor'){
             $leave_applications = LeaveApplication::where('status', '=', 'for-approval-supervisor' );
-    
-    
         }
         else if($status == 'for-approval-head'){
             $leave_applications = LeaveApplication::where('status', '=', 'for-approval-head' );
-
-      
         }
         else if($status == 'declined'){
-            $leave_applications = LeaveApplication::where('status', '=', 'declined');
-                                                   
+            $leave_applications = LeaveApplication::where('status', '=', 'declined');                                        
         }
         else if($status == 'approved'){
-            $leave_applications = LeaveApplication::where('status', '=', 'approved');
-                                                   
+            $leave_applications = LeaveApplication::where('status', '=', 'approved');                                         
         }
         else{
             $leave_applications = LeaveApplication::where('status', '=', $status )
@@ -74,7 +90,6 @@ class LeaveApplicationController extends Controller
                 $log->whereAction($status);
             });
         }
-
 
         if (isset($request->search)) {
             $search = $request->search; 
@@ -87,7 +102,7 @@ class LeaveApplicationController extends Controller
     }
 
 
-    public function updateStatus (Request $request)
+    public function updateLeaveApplicationStatus (Request $request)
     {
         try {
                 $user_id = Auth::user()->id;
@@ -122,10 +137,8 @@ class LeaveApplicationController extends Controller
                             $leave_application_id = $request->leave_application_id;
                             $leave_applications = LeaveApplication::where('id','=', $leave_application_id)
                                                                     ->first();
-                            if($leave_applications){
-                            
-                                 
-                                 $leave_application_log = new LeaveApplicationLog();
+                            if($leave_applications){    
+                                $leave_application_log = new LeaveApplicationLog();
                                 $leave_application_log->action = $action;
                                 $leave_application_log->leave_application_id = $leave_application_id;
                                 $leave_application_log->action_by = $user_id;
@@ -144,11 +157,9 @@ class LeaveApplicationController extends Controller
                                     foreach ($leave_application_date_time as $leave_date_time) {
                                         $date_from = Carbon::parse($leave_date_time->date_from);
                                         $date_to = Carbon::parse($leave_date_time->date_to);
-                                        
                                         $total_days += $date_to->diffInDays($date_from) + 1; // Add 1 to include both the start and end dates
 
                                     }
-
                                     $employee_leave_credits = new EmployeeLeaveCredit();
                                     $employee_leave_credits->employee_profile_id = $user->id;
                                     $employee_leave_credits->leave_application_id = $leave_application_id;
@@ -158,14 +169,10 @@ class LeaveApplicationController extends Controller
                                     $employee_leave_credits->save();
     
                                 }
-                                
-                                    
                                 return response(['message' => 'Application has been sucessfully '.$message_action, 'data' => $leave_application], Response::HTTP_CREATED); 
                             }
                 }           
             }
-
-
          catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage(),'error'=>true]);
         }
@@ -196,7 +203,6 @@ class LeaveApplicationController extends Controller
                                 $leave_application_log->save();
 
                                 $leave_application = LeaveApplication::findOrFail($leave_application_id);
-                                $leave_application->declined_at = now();
                                 $leave_application->status = 'declined';
                                 $leave_application->update();
                                 return response(['message' => 'Application has been sucessfully declined', 'data' => $leave_application], Response::HTTP_CREATED);  
@@ -209,6 +215,40 @@ class LeaveApplicationController extends Controller
         }
     }
 
+    public function cancelLeaveApplication(Request $request)
+    {
+        try {
+                    $leave_application_id = $request->leave_application_id;
+                    $leave_applications = LeaveApplication::where('id','=', $leave_application_id)
+                                                            ->first();
+                if($leave_applications)
+                {
+                        $user_id = Auth::user()->id;     
+                        $user = EmployeeProfile::where('id','=',$user_id)->first();
+                        $user_password=$user->password;
+                        $password=$request->password;
+                        if($user_password==$password)
+                        {
+                            if($user_id){
+                                $leave_application_log = new LeaveApplicationLog();
+                                $leave_application_log->action = 'cancel';
+                                $leave_application_log->leave_application_id = $leave_application_id;
+                                $leave_application_log->date = now()->toDateString('Ymd');
+                                $leave_application_log->action_by = $user_id;
+                                $leave_application_log->save();
+
+                                $leave_application = LeaveApplication::findOrFail($leave_application_id);
+                                $leave_application->status = 'cancelled';
+                                $leave_application->update();
+                                return response(['message' => 'Application has been sucessfully cancelled', 'data' => $leave_application], Response::HTTP_CREATED);  
+            
+                            }
+                         }
+                }
+            } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage(),  'error'=>true]);
+        }
+    }
     /**
      * Store a newly created resource in storage.
      */

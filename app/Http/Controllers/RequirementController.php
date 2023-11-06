@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Requirement;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\LeaveType;
+use App\Models\EmployeeProfile;
+use App\Models\LeaveType as ModelsLeaveType;
 use App\Models\RequirementLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class RequirementController extends Controller
 {
@@ -113,5 +117,57 @@ class RequirementController extends Controller
     public function destroy(Requirement $requirement)
     {
         //
+    }
+
+    public function deactivateLeaveType(Request $request,$leave_type_id)
+    {
+        try{
+            $user_id = Auth::user()->id;
+            $user = EmployeeProfile::where('id','=',$user_id)->first();
+            $user_password=$user->password;
+            $password=$request->password;
+            if($user_password==$password)
+            {
+                $deactivate_leave_type = ModelsLeaveType::findOrFail($leave_type_id);
+                $deactivate_leave_type->status="deactivated";
+                $deactivate_leave_type->reason=$request->reason;
+                $deactivate_leave_type->update();
+                $process_name="Deactivate";
+                $leave_type_logs = $this->storeLeaveTypeLog($leave_type_id,$process_name);
+                return response()->json(['data' => 'Success'], Response::HTTP_OK);
+            }
+           
+            
+        }catch(\Throwable $th){
+         
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+        
+    }
+
+    public function reactivateLeaveType(Request $request,$leave_type_id)
+    {
+        try{
+            $user_id = Auth::user()->id;
+            $user = EmployeeProfile::where('id','=',$user_id)->first();
+            $user_password=$user->password;
+            $password=$request->password;
+            if($user_password==$password)
+            {
+                $deactivate_leave_type = LeaveType::findOrFail($leave_type_id);
+                $deactivate_leave_type->status="active";
+                $deactivate_leave_type->reason=$request->reason;
+                $deactivate_leave_type->update();
+                $process_name="Reactivate";
+                $leave_type_logs = $this->storeLeaveTypeLog($leave_type_id,$process_name);
+                return response()->json(['data' => 'Success'], Response::HTTP_OK);
+            }
+           
+            
+        }catch(\Throwable $th){
+         
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+        
     }
 }
