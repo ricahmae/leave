@@ -52,6 +52,7 @@ class LeaveCreditController extends Controller
         ->map(function ($employee) use ($startDate, $endDate) {
              $total_minutes = $employee->Dtr
         ->whereBetween('created_at', [$startDate, $endDate])
+        ->sum('total_working_minutes')
         ->sum('total_working_minutes');
 
         return [
