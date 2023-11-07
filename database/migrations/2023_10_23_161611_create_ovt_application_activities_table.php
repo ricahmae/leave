@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('ovt_application_activities', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('overtime_application_id')->unsigned();
+            $table->foreign('overtime_application_id')->references('id')->on('overtime_applications')->onDelete('cascade');
+            $table->string('activity_name')->nullable();
+            $table->string('quantity')->nullable(); 
+            $table->string('man_hour')->nullable(); 
+            $table->string('period_covered')->nullable(); 
             $table->timestamps();
         });
     }

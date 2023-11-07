@@ -62,6 +62,7 @@ class LeaveTypeController extends Controller
             $code = preg_split("/[\s,_-]+/", $request->name);
             $leave_type->code = $code;
             $leave_type->status = 'active';
+            $leave_type->is_special = $request->is_special;
             if ($request->hasFile('attachment')) {
                 $attachment = $request->file('attachment');//Pdf or docs
                 if ($attachment->isValid()) {

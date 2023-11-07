@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('leave_applications', function (Blueprint $table) {
             $table->id();
-            $table->string('reference_number');
+            $table->string('reference_number')->nullable();
             $table->string('country')->nullable();
             $table->string('city')->nullable();
             $table->string('zip_code')->nullable();

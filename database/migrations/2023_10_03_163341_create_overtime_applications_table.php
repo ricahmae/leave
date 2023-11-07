@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('overtime_applications', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('employee_profile_id')->unsigned();
+            $table->foreign('employee_profile_id')->references('id')->on('employee_profiles')->onDelete('cascade');
+            $table->string('reference_number')->nullable();
+            $table->string('status');
+            $table->string('remarks')->nullable();
+            $table->string('purpose')->nullable();
+            $table->string('date');
             $table->timestamps();
         });
     }

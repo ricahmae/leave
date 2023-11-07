@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ovt_application_logs', function (Blueprint $table) {
+        Schema::create('monetization_application_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('overtime_application_id')->unsigned();
-            $table->foreign('overtime_application_id')->references('id')->on('overtime_applications')->onDelete('cascade');
+            $table->unsignedBigInteger('monetization_application_id')->unsigned();
+            $table->foreign('monetization_application_id')->references('id')->on('monetization_applications')->onDelete('cascade');
             $table->unsignedBigInteger('action_by')->unsigned();
             $table->foreign('action_by')->references('id')->on('users')->onDelete('cascade');
             $table->string('action')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ovt_application_logs');
+        Schema::dropIfExists('monetization_application_logs');
     }
 };

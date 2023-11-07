@@ -11,19 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ob_applications', function (Blueprint $table) {
+        Schema::create('cto_applications', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('employee_profile_id')->unsigned();
             $table->foreign('employee_profile_id')->references('id')->on('employee_profiles')->onDelete('cascade');
-            $table->string('date_from');
-            $table->string('date_to');
-            $table->string('time_from');
-            $table->string('time_to');
-            $table->string('reason')->nullable();
+            $table->string('remarks')->nullable();
             $table->string('status');
-            $table->string('date')->nullable();
+            $table->string('purpose')->nullable();
             $table->string('reference_number')->nullable();
-           
+            $table->string('date')->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ob_applications');
+        Schema::dropIfExists('cto_applications');
     }
 };

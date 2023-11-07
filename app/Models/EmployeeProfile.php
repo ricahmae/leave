@@ -42,6 +42,11 @@ class EmployeeProfile extends Model
         return $this->hasMany(EmployeeLeaveCredit::class);
     }
     
+    public function Dtr()
+    {
+        return $this->hasMany(DailyTimeRecord::class);
+    }
+    
 
     
 }

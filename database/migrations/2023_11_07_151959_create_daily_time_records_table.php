@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('official_time_requirements', function (Blueprint $table) {
+        Schema::create('daily_time_records', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('official_time_requirements');
+        Schema::dropIfExists('daily_time_records');
     }
 };

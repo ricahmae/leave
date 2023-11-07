@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\LeaveCredit;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EmployeeLeaveCredit;
+use App\Http\Resources\EmployeeProfile;
 use App\Http\Resources\LeaveCredit as ResourcesLeaveCredit;
+use App\Models\DailyTimeRecord;
+use App\Models\EmployeeLeaveCredit as ModelsEmployeeLeaveCredit;
+use App\Models\EmployeeProfile as ModelsEmployeeProfile;
+use App\Models\LeaveType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-
+use Carbon\Carbon;
 class LeaveCreditController extends Controller
 {
     /**
@@ -28,17 +34,58 @@ class LeaveCreditController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function addMonthlyLeaveCredit()
     {
-        //
+ 
+        $currentDate = Carbon::now();
+        $previousMonth = $currentDate->subMonth();
+        $daysInPreviousMonth = $previousMonth->daysInMonth;
+
+        $startDate = now()->subMonth()->firstOfMonth();
+        $endDate = now()->subMonth()->endOfMonth();
+       
+        $results = ModelsEmployeeProfile::with('Dtr')
+        ->whereHas('Dtr', function ($query) use ($startDate, $endDate) {
+             $query->whereBetween('create_at', [$startDate, $endDate]);
+             })
+        ->get()
+        ->map(function ($employee) use ($startDate, $endDate) {
+             $total_minutes = $employee->Dtr
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->sum('total_working_minutes');
+
+        return [
+            'employee_profile_id' => $employee->id, // Change 'name' to the actual column name
+            'total_minutes' => $total_minutes,
+        ];
+
+       
+    });
+
+    foreach ($results as $result) {
+        $employee_id = $result['employee_profile_id'];
+        $total_minutes = $result['total_minutes'];
+        $leaveTypes = LeaveType::where('status', '!=', 'special')->get();
+        foreach ($leaveTypes as $leaveType) {
+            $year_credit_value = $leaveType->leave_credit_year/360;
+
+            $employeeCredit = new ModelsEmployeeLeaveCredit();
+            $employeeCredit->credit_value = $total_minutes;
+            $employeeCredit->save();
+        }
+       
+    }
+        return response()->json(['data' => $daysInPreviousMonth], Response::HTTP_OK);
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    
+    public function create()
+    {
+       
+    }
+
+ 
     public function store(Request $request)
     {
         try{
