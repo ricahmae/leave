@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('monetization_application_logs', function (Blueprint $table) {
+        Schema::create('mone_application_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('monetization_application_id')->unsigned();
             $table->foreign('monetization_application_id')->references('id')->on('monetization_applications')->onDelete('cascade');
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('monetization_application_logs');
+        Schema::dropIfExists('mone_application_logs');
     }
 };

@@ -30,6 +30,8 @@ Route::namespace('App\Http\Controllers')->group(function () {
     Route::get('user_leave_credit_logs', 'LeaveApplicationController@getUserLeaveCreditsLogs');
     Route::get('days', 'LeaveCreditController@addMonthlyLeaveCredit');
     
+   
+    
     Route::post('leave_type', 'LeaveTypeController@store');
 });
 

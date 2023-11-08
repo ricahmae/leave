@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LeaveApplicationDateTime;
+use App\Models\MoneApplicationLogs;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class LeaveApplicationDateTimeController extends Controller
+class MoneApplicationLogsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -35,7 +35,7 @@ class LeaveApplicationDateTimeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(LeaveApplicationDateTime $leaveApplicationDateTime)
+    public function show(MoneApplicationLogs $moneApplicationLogs)
     {
         //
     }
@@ -43,7 +43,7 @@ class LeaveApplicationDateTimeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(LeaveApplicationDateTime $leaveApplicationDateTime)
+    public function edit(MoneApplicationLogs $moneApplicationLogs)
     {
         //
     }
@@ -51,7 +51,7 @@ class LeaveApplicationDateTimeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, LeaveApplicationDateTime $leaveApplicationDateTime)
+    public function update(Request $request, MoneApplicationLogs $moneApplicationLogs)
     {
         //
     }
@@ -59,12 +59,7 @@ class LeaveApplicationDateTimeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(LeaveApplicationDateTime $leaveApplicationDateTime)
-    {
-        //
-    }
-
-    public function getupdate(LeaveApplicationDateTime $leaveApplicationDateTime)
+    public function destroy(MoneApplicationLogs $moneApplicationLogs)
     {
         //
     }

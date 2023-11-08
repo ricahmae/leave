@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('daily_time_records', function (Blueprint $table) {
+        Schema::create('biometrics', function (Blueprint $table) {
             $table->id();
+            $table->string('biometric_name');
             $table->timestamps();
         });
     }
@@ -22,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('daily_time_records');
+        Schema::dropIfExists('biometrics');
     }
 };

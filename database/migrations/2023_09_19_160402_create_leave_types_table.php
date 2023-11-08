@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('period');
             $table->string('file_date');
             $table->string('attachment')->nullable();
+            $table->string('status')->nullable();
+            $table->string('leave_credit_year')->nullable();
             $table->unsignedBigInteger('leave_credit_id')->unsigned();
             $table->foreign('leave_credit_id')->nullable()->references('id')->on('leave_credits')->onDelete('cascade');
             $table->timestamps();

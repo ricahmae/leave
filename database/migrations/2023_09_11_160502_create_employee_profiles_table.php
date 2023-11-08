@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('employee_profiles', function (Blueprint $table) {
             $table->id();
-            $table->string('employee_id')->nullable();
             $table->string('profile_url')->nullable();
             $table->date('date_hired');
             $table->string('job_type');
@@ -26,6 +25,8 @@ return new class extends Migration
             $table->foreign('employment_position_id')->references('id')->on('employment_positions');
             $table->unsignedBigInteger('personal_information_id')->unsigned();
             $table->foreign('personal_information_id')->references('id')->on('personal_informations');
+            $table->unsignedBigInteger('biometric_id')->unsigned()->nullable();
+            $table->foreign('biometric_id')->references('id')->on('biometrics');
             $table->timestamps();
         });
     }

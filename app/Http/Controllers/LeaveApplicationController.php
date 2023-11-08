@@ -413,13 +413,20 @@ class LeaveApplicationController extends Controller
                             $leave_application->status = "for-verification-hrmo";
                             $leave_application->date = now()->toDateString('Ymd');
                             $leave_application->save();
-                            
-                            $leave_application_date_time = new LeaveApplicationDateTime();
-                            $leave_application_date_time->date_from = $request->date_from;
-                            $leave_application_date_time->date_to = $request->date_to;
-                            $leave_application_date_time->time_from = $request->time_from;
-                            $leave_application_date_time->time_to = $request->time_to;
-                            $leave_application_date_time->save();
+                            $date=$request->date_from;
+                            if($date!=null)
+                            {
+                                foreach ($date as $dates) {
+                                    $leave_application_date_time = new LeaveApplicationDateTime();
+                                    $leave_application_date_time->date_from = $request->date_from;
+                                    $leave_application_date_time->date_to = $request->date_to;
+                                    $leave_application_date_time->time_from = $request->time_from;
+                                    $leave_application_date_time->time_to = $request->time_to;
+                                    $leave_application_date_time->save();
+                                    }
+
+                            }
+                           
                 
                             if ($request->hasFile('requirements')) {
                                 $requirements = $request->file('requirements');

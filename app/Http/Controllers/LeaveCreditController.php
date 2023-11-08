@@ -36,47 +36,59 @@ class LeaveCreditController extends Controller
 
     public function addMonthlyLeaveCredit()
     {
- 
-        $currentDate = Carbon::now();
-        $previousMonth = $currentDate->subMonth();
-        $daysInPreviousMonth = $previousMonth->daysInMonth;
+        $currentMonth = date('m');
+        $currentDate = date('Y-m-d');
+        $pastMonth = date('m', strtotime('-1 month'));
+       // Subtract one month to get the last month
+        $lastMonthDate = date('Y-m-d', strtotime('-1 month', strtotime($currentDate)));
 
-        $startDate = now()->subMonth()->firstOfMonth();
-        $endDate = now()->subMonth()->endOfMonth();
-       
-        $results = ModelsEmployeeProfile::with('Dtr')
-        ->whereHas('Dtr', function ($query) use ($startDate, $endDate) {
-             $query->whereBetween('create_at', [$startDate, $endDate]);
-             })
-        ->get()
-        ->map(function ($employee) use ($startDate, $endDate) {
-             $total_minutes = $employee->Dtr
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->sum('total_working_minutes')
-        ->sum('total_working_minutes');
+        // Get the first day of the last month
+        $firstDayOfLastMonth = date('Y-m-01', strtotime($lastMonthDate));
 
-        return [
-            'employee_profile_id' => $employee->id, // Change 'name' to the actual column name
-            'total_minutes' => $total_minutes,
-        ];
+        // Get the last day of the last month
+        $lastDayOfLastMonth = date('Y-m-t', strtotime($lastMonthDate));
+        $currentDate = date('Y-m-d');
+        // Subtract one month to get the last month
+         $lastMonthDate = date('Y-m-d', strtotime('-1 month', strtotime($currentDate)));
+         // Get the first day of the last month
+         $firstDayOfLastMonth = date('Y-m-01', strtotime($lastMonthDate));
+         // Get the last day of the last month
+         $lastDayOfLastMonth = date('Y-m-t', strtotime($lastMonthDate));
+         $employees = ModelsEmployeeProfile::with('biometric.dtr')
+         ->get();
+     
+     foreach ($employees as $employee) {
+             $leaveTypes = LeaveType::where('status', '=', 'special')->get();
+                 foreach ($leaveTypes as $leaveType) {
+                    $total_absences="1";
+                    $total_undertime="5";
+                     $month_credit_value = $leaveType->leave_credit_year/12;
+                     $absent_credit_value = $leaveType->leave_credit_year/360 * $total_absences;
+                     $deduct_credit_value = $month_credit_value - $absent_credit_value;
 
-       
-    });
+                     $employeeCredit = new ModelsEmployeeLeaveCredit();
+                     $employeeCredit->leave_type_id = $leaveType->id;
+                     $employeeCredit->employee_profile_id = $employee->id;
+                     $employeeCredit->operation = "add";
+                     $employeeCredit->credit_value = $month_credit_value;
+                     $employeeCredit->date = now()->toDateString('Ymd');
+                     $employeeCredit->save();
 
-    foreach ($results as $result) {
-        $employee_id = $result['employee_profile_id'];
-        $total_minutes = $result['total_minutes'];
-        $leaveTypes = LeaveType::where('status', '!=', 'special')->get();
-        foreach ($leaveTypes as $leaveType) {
-            $year_credit_value = $leaveType->leave_credit_year/360;
+                     $employeeCredit = new ModelsEmployeeLeaveCredit();
+                     $employeeCredit->leave_type_id = $leaveType->id;
+                     $employeeCredit->employee_profile_id = $employee->id;
+                     $employeeCredit->operation = "deduct";
+                     $employeeCredit->credit_value = $deduct_credit_value;
+                     $employeeCredit->date = now()->toDateString('Ymd');
+                     $employeeCredit->save();
 
-            $employeeCredit = new ModelsEmployeeLeaveCredit();
-            $employeeCredit->credit_value = $total_minutes;
-            $employeeCredit->save();
-        }
-       
-    }
-        return response()->json(['data' => $daysInPreviousMonth], Response::HTTP_OK);
+
+                 }
+     }
+        
+
+   
+        return response()->json(['data' => $add_credit_value], Response::HTTP_OK);
 
     }
 
@@ -144,4 +156,7 @@ class LeaveCreditController extends Controller
     {
         //
     }
+
+   
 }
+

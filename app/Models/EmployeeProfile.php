@@ -42,11 +42,9 @@ class EmployeeProfile extends Model
         return $this->hasMany(EmployeeLeaveCredit::class);
     }
     
-    public function Dtr()
+    public function biometric()
     {
-        return $this->hasMany(DailyTimeRecord::class);
+        return $this->belongsTo(Biometric::class);
     }
-    
-
     
 }
