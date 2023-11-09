@@ -66,12 +66,13 @@ class LeaveApplicationController extends Controller
         public function index()
     {
         try{ 
+            
             $leave_applications=[];
             
-           $leave_applications =LeaveApplication::all();
-           $leave_application_resource=ResourcesLeaveApplication::collection($leave_applications);
+           $leave_applications =LeaveApplication::with(['dates','logs', 'requirements', 'leaveType'])->get();
+        //    $leave_application_resource=ResourcesLeaveApplication::collection($leave_applications);
            
-             return response()->json(['data' => $leave_application_resource], Response::HTTP_OK);
+             return response()->json(['data' => $leave_applications], Response::HTTP_OK);
         }catch(\Throwable $th){
         
             return response()->json(['message' => $th->getMessage()], 500);
@@ -274,7 +275,7 @@ class LeaveApplicationController extends Controller
                                 $leave_application_log->action = $action;
                                 $leave_application_log->leave_application_id = $leave_application_id;
                                 $leave_application_log->action_by = $user_id;
-                                $leave_application_log->date = now()->toDateString('Ymd');
+                                $leave_application_log->date = date('Y-m-d');
                                 $leave_application_log->save();
 
                                 $leave_application = LeaveApplication::findOrFail($leave_application_id);   
@@ -297,7 +298,7 @@ class LeaveApplicationController extends Controller
                                     $employee_leave_credits->leave_application_id = $leave_application_id;
                                     $employee_leave_credits->operation = "deduct";
                                     $employee_leave_credits->leave_credit = $total_days;
-                                    $employee_leave_credits->date = now()->toDateString('Ymd');
+                                    $employee_leave_credits->date = date('Y-m-d');;
                                     $employee_leave_credits->save();
     
                                 }
@@ -330,7 +331,7 @@ class LeaveApplicationController extends Controller
                                 $leave_application_log = new LeaveApplicationLog();
                                 $leave_application_log->action = 'declined';
                                 $leave_application_log->leave_application_id = $leave_application_id;
-                                $leave_application_log->date = now()->toDateString('Ymd');
+                                $leave_application_log->date = date('Y-m-d');
                                 $leave_application_log->action_by = $user_id;
                                 $leave_application_log->save();
 
@@ -365,7 +366,7 @@ class LeaveApplicationController extends Controller
                                 $leave_application_log = new LeaveApplicationLog();
                                 $leave_application_log->action = 'cancel';
                                 $leave_application_log->leave_application_id = $leave_application_id;
-                                $leave_application_log->date = now()->toDateString('Ymd');
+                                $leave_application_log->date = date('Y-m-d');
                                 $leave_application_log->action_by = $user_id;
                                 $leave_application_log->save();
 
@@ -407,11 +408,12 @@ class LeaveApplicationController extends Controller
                             $leave_application->patient_type = $request->patient_type;
                             $leave_application->illnes = $request->illnes;
                             $leave_application->reason = $request->reason;
-                            $leave_application->with_pay = $request->with_pay;
+                            $leave_application->with_pay =  $request->has('with_pay');
                             $leave_application->whole_day = $request->whole_day;
                             $leave_application->leave_credit_total = "2";
                             $leave_application->status = "for-verification-hrmo";
-                            $leave_application->date = now()->toDateString('Ymd');
+
+                            $leave_application->date = date('Y-m-d');
                             $leave_application->save();
                             $date=$request->date_from;
                             if($date!=null)
@@ -494,7 +496,7 @@ class LeaveApplicationController extends Controller
             $leave_application_log->action_by = $user->id;
             $leave_application_log->action = $process_name;
             $leave_application_log->status = "applied";
-            $leave_application_log->date = now()->toDateString('Ymd');
+            $leave_application_log->date = date('Y-m-d');;
             $leave_application_log->save();
             return $leave_application_log;
         } catch(\Exception $e) {

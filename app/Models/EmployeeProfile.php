@@ -47,4 +47,7 @@ class EmployeeProfile extends Model
         return $this->belongsTo(Biometric::class);
     }
     
+    public function leaveLogs() {
+        return $this->hasMany(LeaveTypeLog::class);
+    }
 }

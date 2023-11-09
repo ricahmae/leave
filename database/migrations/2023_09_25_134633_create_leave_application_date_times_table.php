@@ -17,8 +17,7 @@ return new class extends Migration
             $table->foreign('leave_application_id')->references('id')->on('leave_applications')->onDelete('cascade');
             $table->string('date_from');
             $table->string('date_to');
-            $table->string('time_from');
-            $table->string('time_to');
+          
             $table->timestamps();
         });
     }

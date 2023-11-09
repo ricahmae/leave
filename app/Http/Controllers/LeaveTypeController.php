@@ -23,12 +23,12 @@ class LeaveTypeController extends Controller
     public function index()
     {
         try{
-            $leave_types=[];
+        //     $leave_types=[];
             
-           $leave_types =LeaveType::all();
-           $leave_type_resource=ResourcesLeaveType::collection($leave_types);
-           
-             return response()->json(['data' => $leave_type_resource], Response::HTTP_OK);
+        //    $leave_types =LeaveType::all();
+        //    $leave_type_resource=ResourcesLeaveType::collection($leave_types);
+        $leaveTypes = LeaveType::with('logs.employeeProfile','requirements.logs.employeeProfile')->get();
+             return response()->json(['data' => $leaveTypes], Response::HTTP_OK);
         }catch(\Throwable $th){
         
             return response()->json(['message' => $th->getMessage()], 500);
@@ -62,7 +62,8 @@ class LeaveTypeController extends Controller
             $code = preg_split("/[\s,_-]+/", $request->name);
             $leave_type->code = $code;
             $leave_type->status = 'active';
-            $leave_type->is_special = $request->is_special;
+            $leave_type->is_special =$request->has('is_special');
+            $leave_type->leave_credit_year = $request->leave_credit_year;
             if ($request->hasFile('attachment')) {
                 $attachment = $request->file('attachment');//Pdf or docs
                 if ($attachment->isValid()) {

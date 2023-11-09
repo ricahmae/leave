@@ -9,7 +9,9 @@ class LeaveApplication extends Model
 {
     use HasFactory;
     protected $table = 'leave_applications';
-
+    protected $casts = [
+        'with_pay' => 'boolean',
+    ];
     public $fillable = [
         'user_id',
         'leave_type_id',
@@ -23,9 +25,10 @@ class LeaveApplication extends Model
         'remarks',
         'date'
     ];
-        public function leave_type(){
-            return $this->belongsTo(LeaveType::class, 'leave_type_id','id');
-        }
+    public function leaveType()
+    {
+        return $this->belongsTo(LeaveType::class);
+    }
         public function requirements()
         {
             return $this->hasMany(LeaveApplicationRequirement::class);

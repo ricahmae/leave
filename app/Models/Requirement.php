@@ -23,6 +23,11 @@ class Requirement extends Model
         return $this->hasMany(RequirementLog::class);
     }
    
+    public function leaveTypes() {
+        return $this->belongsToMany(LeaveType::class, 'leave_type_requirements');
+    }
+
+   
 
 
 

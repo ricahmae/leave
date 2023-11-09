@@ -17,8 +17,8 @@ class RequirementLog extends JsonResource
         return [
             'id' => $this->id,
             // 'leave_requirement_id' => $this->name,
-            'action_name' => $this->action_name,
-            // 'action_by' => $this->actioned_by ? new User( $this->action_by) : null,
+            'action' => $this->action,
+            'action_by' => $this->actioned_by ? new EmployeeProfile( $this->action_by) : null,
            
         ];
     }

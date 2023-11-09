@@ -20,12 +20,11 @@ return new class extends Migration
             $table->string('patient_type')->nullable();
             $table->string('illness')->nullable();
             $table->string('reason')->nullable();
-            $table->string('with_pay')->nullable();
-            $table->string('whole_day')->nullable();
             $table->string('leave_credit_total')->nullable();
             $table->string('status')->nullable();;
             $table->string('remarks')->nullable();;
             $table->string('date')->nullable();;
+            $table->boolean('with_pay')->default(false);
             $table->unsignedBigInteger('employee_profile_id')->unsigned();
             $table->foreign('employee_profile_id')->references('id')->on('employee_profiles')->onDelete('cascade');
             $table->unsignedBigInteger('leave_type_id')->unsigned();

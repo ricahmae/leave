@@ -72,11 +72,11 @@ class LeaveCreditController extends Controller
             // $dates = $data['dates'];
             // $absences = $data['absences']
             ;
-                 $total_absences="2";
+                 $total_absences="1";
                  $total_undertime="5";
                  $leaveTypes=[];
                  $vl_leave=[];
-                 $leaveTypes = LeaveType::where('status', '=', 'special')->get();
+                 $leaveTypes = LeaveType::where('is_special', '=', '1')->get();
                  $vl_leave = LeaveType::where('name', '=', 'Sick Leave')->first();
                     $employee_leave_credits= ModelsEmployeeLeaveCredit::where('employee_profile_id', '=','1')
                     ->where('leave_type_id', '=','1')->get();
@@ -119,30 +119,38 @@ class LeaveCreditController extends Controller
                                     }
                                     else
                                     {
-                                        $employeeCredit = new ModelsEmployeeLeaveCredit();
-                                        $employeeCredit->leave_type_id = $vl_leave->id;
-                                        $employeeCredit->employee_profile_id = $employee->id;
-                                        $employeeCredit->operation = "deduct";
-                                        $employeeCredit->reason = "Absent";
-                                        $employeeCredit->absent_total =$total_absences;
-                                        $employeeCredit->credit_value = $absent_credit_value;
-                                        $employeeCredit->date = now()->toDateString('Ymd');
-                                        $employeeCredit->save();
+                                        if($absent_credit_value !=0)
+                                        {
+                                            $employeeCredit = new ModelsEmployeeLeaveCredit();
+                                            $employeeCredit->leave_type_id = $vl_leave->id;
+                                            $employeeCredit->employee_profile_id = $employee->id;
+                                            $employeeCredit->operation = "deduct";
+                                            $employeeCredit->reason = "Absent";
+                                            $employeeCredit->absent_total =$total_absences;
+                                            $employeeCredit->credit_value = $absent_credit_value;
+                                            $employeeCredit->date = now()->toDateString('Ymd');
+                                            $employeeCredit->save();
+
+                                        }
+                                      
     
                                     }
                                 }
                             }
                         }
         
-                        $employeeCredit = new ModelsEmployeeLeaveCredit();
-                        $employeeCredit->leave_type_id = $vl_leave->id;
-                        $employeeCredit->employee_profile_id = $employee->id;
-                        $employeeCredit->operation = "deduct";
-                        $employeeCredit->reason = "Undertime";
-                        $employeeCredit->undertime_total = $total_undertime;
-                        $employeeCredit->credit_value = $undertime_credit_value;
-                        $employeeCredit->date = now()->toDateString('Ymd');
-                        $employeeCredit->save();
+                            if($undertime_credit_value !=0)
+                                            {
+                            $employeeCredit = new ModelsEmployeeLeaveCredit();
+                            $employeeCredit->leave_type_id = $vl_leave->id;
+                            $employeeCredit->employee_profile_id = $employee->id;
+                            $employeeCredit->operation = "deduct";
+                            $employeeCredit->reason = "Undertime";
+                            $employeeCredit->undertime_total = $total_undertime;
+                            $employeeCredit->credit_value = $undertime_credit_value;
+                            $employeeCredit->date = now()->toDateString('Ymd');
+                            $employeeCredit->save();
+                        }
         
                     }
                     
