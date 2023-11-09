@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('monetization_application_id')->unsigned();
             $table->foreign('monetization_application_id')->references('id')->on('monetization_applications')->onDelete('cascade');
             $table->unsignedBigInteger('action_by')->unsigned();
-            $table->foreign('action_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('action_by')->references('id')->on('employee_profiles')->onDelete('cascade');
             $table->string('action')->nullable();
             $table->string('status');
             $table->string('date');

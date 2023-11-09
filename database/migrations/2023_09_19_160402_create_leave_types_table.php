@@ -22,8 +22,7 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->boolean('is_special')->default(false);
             $table->string('leave_credit_year')->nullable();
-            $table->unsignedBigInteger('leave_credit_id')->unsigned();
-            $table->foreign('leave_credit_id')->nullable()->references('id')->on('leave_credits')->onDelete('cascade');
+            
             $table->timestamps();
             
         });
