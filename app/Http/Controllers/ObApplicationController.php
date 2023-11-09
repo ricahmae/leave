@@ -29,10 +29,10 @@ class ObApplicationController extends Controller
         try{ 
             $official_business_applications=[];
             
-            $official_business_applications =ObApplication::all();
-            $official_business_application_resource=ResourcesObApplication::collection($official_business_applications);
+            $official_business_applications =ObApplication::with(['logs', 'requirements'])->get();
+            // $official_business_application_resource=ResourcesObApplication::collection($official_business_applications);
            
-             return response()->json(['data' => $official_business_application_resource], Response::HTTP_OK);
+             return response()->json(['data' => $official_business_applications], Response::HTTP_OK);
         }catch(\Throwable $th){
         
             return response()->json(['message' => $th->getMessage()], 500);
@@ -116,7 +116,7 @@ class ObApplicationController extends Controller
                                 $ob_application_log->action = $action;
                                 $ob_application_log->ob_application_id = $ob_application_id;
                                 $ob_application_log->action_by = $user_id;
-                                $ob_application_log->date = now()->toDateString('Ymd');
+                                $ob_application_log->date = date('Y-m-d');
                                 $ob_application_log->save();
 
                                 $ob_application = ObApplication::findOrFail($ob_application_id);   
@@ -144,7 +144,7 @@ class ObApplicationController extends Controller
             $official_business_application->date_to = $request->date_to;
             $official_business_application->business_from = $request->business_from;
             $official_business_application->business_to = $request->business_to;
-            $official_business_application->date = now()->toDateString('Ymd');
+            $official_business_application->date = date('Y-m-d');
             $official_business_application->update();
          
             if ($request->hasFile('requirements')) {
@@ -198,8 +198,7 @@ class ObApplicationController extends Controller
             $official_business_application->business_to = $request->business_to;
             $official_business_application->status = "for-approval-supervisor";
             $official_business_application->reason = "for-approval-supervisor";
-            $official_business_application->date = now()->toDateString('Ymd');
-            $official_business_application->save();
+            $official_business_application->date = date('Y-m-d');
             
             if ($request->hasFile('requirements')) {
                 $requirements = $request->file('requirements');
@@ -259,7 +258,7 @@ class ObApplicationController extends Controller
                                 $ob_application_log = new ObApplicationLog();
                                 $ob_application_log->action = 'declined';
                                 $ob_application_log->ob_application_id = $ob_application_id;
-                                $ob_application_log->date = now()->toDateString('Ymd');
+                                $ob_application_log->date = date('Y-m-d');
                                 $ob_application_log->action_by = $user_id;
                                 $ob_application_log->save();
 
@@ -299,7 +298,7 @@ class ObApplicationController extends Controller
             $official_time_application_log->action_by = $user_id;
             $official_time_application_log->action = $process_name;
             $official_time_application_log->status = "applied";
-            $official_time_application_log->date = now()->toDateString('Ymd');
+            $official_time_application_log->date = date('Y-m-d');
             $official_time_application_log->save();
 
             return $official_time_application_log;
@@ -326,7 +325,7 @@ class ObApplicationController extends Controller
                                 $ob_application_log = new ObApplicationLog();
                                 $ob_application_log->action = 'cancelled';
                                 $ob_application_log->ob_application_id = $ob_application_id;
-                                $ob_application_log->date = now()->toDateString('Ymd');
+                                $ob_application_log->date = date('Y-m-d');
                                 $ob_application_log->action_by = $user_id;
                                 $ob_application_log->save();
 

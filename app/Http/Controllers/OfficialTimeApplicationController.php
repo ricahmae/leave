@@ -30,10 +30,10 @@ class OfficialTimeApplicationController extends Controller
         try{ 
             $official_time_applications=[];
             
-           $official_time_applications =OfficialTimeApplication::all();
-           $official_time_application_resource=ResourcesOfficialTimeApplication::collection($official_time_applications);
+           $official_time_applications =OfficialTimeApplication::with(['logs', 'requirements'])->get();;
+        //    $official_time_application_resource=ResourcesOfficialTimeApplication::collection($official_time_applications);
            
-             return response()->json(['data' => $official_time_application_resource], Response::HTTP_OK);
+             return response()->json(['data' => $official_time_applications], Response::HTTP_OK);
         }catch(\Throwable $th){
         
             return response()->json(['message' => $th->getMessage()], 500);
@@ -85,7 +85,7 @@ class OfficialTimeApplicationController extends Controller
             $official_time_application->time_to = $request->time_to;
             $official_time_application->status = "for-approval-supervisor";
             $official_time_application->reason = "for-approval-supervisor";
-            $official_time_application->date = now()->toDateString('Ymd');
+            $official_time_application->date = date('Y-m-d');
             $official_time_application->save();
          
             if ($request->hasFile('requirements')) {
@@ -146,7 +146,7 @@ class OfficialTimeApplicationController extends Controller
                                 $ot_application_log = new ModelsOtApplicationLog();
                                 $ot_application_log->action = 'declined';
                                 $ot_application_log->ot_application_id = $ot_application_id;
-                                $ot_application_log->date = now()->toDateString('Ymd');
+                                $ot_application_log->date = date('Y-m-d');
                                 $ot_application_log->action_by = $user_id;
                                 $ot_application_log->save();
 
@@ -182,7 +182,7 @@ class OfficialTimeApplicationController extends Controller
                                 $ot_application_log = new ModelsOtApplicationLog();
                                 $ot_application_log->action = 'cancelled';
                                 $ot_application_log->ot_application_id = $ot_application_id;
-                                $ot_application_log->date = now()->toDateString('Ymd');
+                                $ot_application_log->date = date('Y-m-d');
                                 $ot_application_log->action_by = $user_id;
                                 $ot_application_log->save();
 
@@ -235,7 +235,7 @@ class OfficialTimeApplicationController extends Controller
                                 $ot_application_log->action = $action;
                                 $ot_application_log->ot_application_id = $ot_application_id;
                                 $ot_application_log->action_by = $user_id;
-                                $ot_application_log->date = now()->toDateString('Ymd');
+                                $ot_application_log->date = date('Y-m-d');
                                 $ot_application_log->save();
 
                                 $ot_application = OfficialTimeApplication::findOrFail($ot_application_id);   
@@ -263,7 +263,7 @@ class OfficialTimeApplicationController extends Controller
             $official_time_application->date_to = $request->date_to;
             $official_time_application->time_from = $request->time_from;
             $official_time_application->time_to = $request->time_to;
-            $official_time_application->date = now()->toDateString('Ymd');
+            $official_time_application->date = date('Y-m-d');
             $official_time_application->update();
          
             if ($request->hasFile('requirements')) {
@@ -328,7 +328,7 @@ class OfficialTimeApplicationController extends Controller
             $official_time_application_log->action_by = $user_id;
             $official_time_application_log->process_name = $process_name;
             $official_time_application_log->status = "applied";
-            $official_time_application_log->date = now()->toDateString('Ymd');
+            $official_time_application_log->date = date('Y-m-d');
             $official_time_application_log->save();
 
             return $official_time_application_log;

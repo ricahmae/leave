@@ -128,7 +128,7 @@ class LeaveCreditController extends Controller
                                             $employeeCredit->reason = "Absent";
                                             $employeeCredit->absent_total =$total_absences;
                                             $employeeCredit->credit_value = $absent_credit_value;
-                                            $employeeCredit->date = now()->toDateString('Ymd');
+                                            $employeeCredit->date = date('Y-m-d');
                                             $employeeCredit->save();
 
                                         }
@@ -148,7 +148,7 @@ class LeaveCreditController extends Controller
                             $employeeCredit->reason = "Undertime";
                             $employeeCredit->undertime_total = $total_undertime;
                             $employeeCredit->credit_value = $undertime_credit_value;
-                            $employeeCredit->date = now()->toDateString('Ymd');
+                            $employeeCredit->date = date('Y-m-d');
                             $employeeCredit->save();
                         }
         
@@ -166,7 +166,7 @@ class LeaveCreditController extends Controller
                          $employeeCredit->operation = "add";
                          $employeeCredit->reason = "Monthly Leave Credits";
                          $employeeCredit->credit_value = $month_credit_value;
-                         $employeeCredit->date = now()->toDateString('Ymd');
+                         $employeeCredit->date = date('Y-m-d');
                          $employeeCredit->save();
     
                     
